@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>todolist</title>
+
+	<!-- 
+		JSON.stringify()将对象转成字符串
+		JSON.parse()转成对象
+	
+
+
+	 -->
+	 <style>
+		body,html{
+			width: 100%;
+			height: 100%;
+		}
+		body{
+			margin: 0;
+		}
+		a{
+			text-decoration: none;
+		}
+		*{
+			font-family: "微软雅黑";
+		}
+		.nav{
+			width: 100%;
+			height: 50px;
+			background: #323232;
+		}
+		.nav-box{
+			width: 600px;
+			height: 100%;
+			margin: 0 auto;
+			line-height: 50px;
+		}
+		.nav-box a{
+			font-size: 20px;
+			color: #DDD2AC;
+			padding-right: 140px;
+		}
+		.nav-box  input{
+			width: 360px;
+			height: 25px;
+			border: 0;
+			border-radius: 3px;
+			color: #A9A9A9;
+		}
+		.cont{
+			width: 100%;
+			height: 600px;
+			background: #CDCDCD;
+		}
+		.cont-box{
+			width: 600px;
+			height: auto;
+			margin: 0 auto;
+			font-size: 24px;
+		}
+		.todo,.done{
+			width: 600px;
+			height: auto;
+
+		}
+		.todo .todo-top,.done .done-top{
+			width: 100%;
+			height: 40px;
+			line-height: 40px;
+		}
+		.todo-top span:nth-child(2),.done-top span:nth-child(2){
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			background: #eee;
+			text-align: center;
+			font-size: 10px;
+			line-height: 20px;
+			color: red;
+			float: right;
+			margin-top: 10px;
+		}
+		.add,.com{
+			width: 100%;
+			height: 35px;
+			background: #fff;
+			border-radius: 3px;
+			line-height: 35px;
+			position: relative;
+			margin-bottom: 5px;
+			/*display: none;*/
+		}
+		.add span:nth-of-type(1),.com span:nth-of-type(1){
+			display: inline-block;
+			width: 5px;
+			height: 100%;
+			border-radius: 3px 0 0 3px;
+			background: #629A9C;
+		}
+		.add span:nth-of-type(2),.com span:nth-of-type(2){
+			display: inline-block;
+			position: absolute;
+			top:0px;
+			left: 30px;
+			font-size: 20px;
+			color: #666;
+		}
+		.add span:nth-of-type(3),.com span:nth-of-type(3){
+			display: inline-block;
+			width: 10px;
+			height: 2px;
+			border: 10px solid #CCCCCC;
+			background: #fff;
+			position: absolute;
+			right: 5px;
+			bottom: 6px;
+		}
+		.add input,.com input{
+			position: absolute;
+			left: 10px;
+			top:50%;
+			margin-top: -5px;
+		}
+		
+	</style>
+</head>
+<body>
+	<div class="nav">
+		<div class="nav-box">
+			<a href="">ToDoList</a>
+			<input type="text" placeholder="添加ToDo">
+		</div>
+		
+	</div>
+	<div class="cont">
+		<div class="cont-box">
+			<div class="todo">
+				<div class="todo-top">
+					<span>正在进行</span><span class="count1">0</span>
+				</div>
+				<div class="todo-bot">
+					<div class="add">
+						<span></span>
+						<input type="checkbox" class="add-in">
+						<span class="add-s"></span>
+						<span class="add-h"></span>
+					</div>
+				</div>
+			</div>
+			<div class="done">
+				<div class="done-top">
+					<span>已经完成</span><span class="count2">0</span>
+				</div>
+				<div class="done-bot">
+					<div class="com">
+						<span></span>
+						<input type="checkbox" class="com-in">
+						<span class="com-s"></span>
+						<span class="com-h"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+	<script>
+		
+		var text=document.querySelector("input[type=text]");
+		var adds=document.querySelector(".add-s");
+		var count1=document.querySelector(".count1");
+		var coms=document.querySelector(".com-s");
+		var count2=document.querySelector(".count2");
+		var add=document.querySelector(".add");
+		var com=document.querySelector(".com")
+		var addbot=document.querySelector(".todo-bot");
+		var combot=document.querySelector(".done-bot")
+		text.onkeydown=function(e){
+			if(e.keyCode==13){				
+				var val=this.value;
+				if(val==""){
+					alert("请添加ToDo");
+					return;
+				}else{
+					var data=getData();
+					data.push({title:val,status:false});
+					text.value="";
+					saveData(data);
+					reload();
+				}
+			}
+		}
+		function changeStatus(i,t){
+			var data=getData();
+			data[i].status=t;
+			saveData(data);
+			reload();
+		}
+		function changeText(i,d){
+			var data=getData();
+			data[i].title=d;
+			saveData(data);
+			reload();
+		}
+		function del(i){
+			var data=getData();
+			data.splice(i,1);
+			saveData(data);
+			reload();
+		}
+		// getData();
+		function getData(){
+			var data=JSON.parse(localStorage.getItem('todos'));
+			return data||[];
+		}
+		// saveData();
+		function saveData(data){
+			localStorage.setItem('todos',JSON.stringify(data));
+		}
+		reload();
+		function reload(){
+			var nowStr="";
+			var nowTips=0;
+			var comStr="";
+			var comTips=0;
+			var data=getData();
+			for(var i=0;i<data.length;i++){
+				if(data[i].status==false){
+					nowStr+='<div class="add"><span></span><input type="checkbox" class="add-in" onclick=changeStatus('+i+',true)><span class="add-s" contenteditable onblur=changeText('+i+',this.innerHTML)>'+data[i].title+'</span><span class="add-h" onclick=del('+i+') ></span></div>';
+					nowTips++;
+				}else{
+					comStr+='<div class="com"><span></span><input type="checkbox" class="com-in" onclick=changeStatus('+i+',false)><span class="com-s" contenteditable onblur=changeText('+i+',this.innerHTML)>'+data[i].title+'</span><span class="com-h" onclick=del('+i+')></span></div>';
+					comTips++;
+				}				
+			}
+			addbot.innerHTML=nowStr;
+			count1.innerHTML=nowTips;
+			combot.innerHTML=comStr;
+			count2.innerHTML=comTips;
+		}
+
+
+	</script>
+</body>
+</html>
